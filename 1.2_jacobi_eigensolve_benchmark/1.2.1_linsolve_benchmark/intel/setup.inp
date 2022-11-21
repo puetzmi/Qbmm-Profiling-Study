@@ -1,0 +1,5 @@
+linearSolverTypes = {
+                        "LinearLapackGesvSolver",
+                        "LinearEigenlibPartialPivLuSolver",
+                        "LinearVandermondeSolver"
+};
