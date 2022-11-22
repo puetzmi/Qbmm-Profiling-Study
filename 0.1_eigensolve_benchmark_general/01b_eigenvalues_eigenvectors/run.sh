@@ -8,7 +8,6 @@ NMAX=100                # maximum matrix size
 NMAT=1000               # number of matrices per size
 NEXEC=1000              # number of executions per matrix
 OUTFILE=cpu_times.out   # output filename
-RANDSEED=1120012        # seed for random number generator (may be omitted to use default)
 EIGVECS=true            # compute eigenvalues only
 
 
