@@ -1,7 +1,0 @@
-coreInversionTypes = {
-                        LqmdAlgorithm,
-                        GolubWelschAlgorithmLapackPotrf,
-                        GolubWelschAlgorithmLapackPotrf2,
-                        GolubWelschAlgorithmEigenlib,
-                        GolubWelschAlgorithmPlainCxx
-                     };
