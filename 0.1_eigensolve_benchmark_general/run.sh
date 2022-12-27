@@ -8,7 +8,6 @@ NMAX=100                # maximum matrix size
 NMAT=1000               # number of matrices per size
 NEXEC=1000              # number of executions per matrix
 OUTFILE=cpu_times.out   # output filename
-EIGVECS=false           # compute eigenvalues only
 
 
 ## DISABLE MULTI-THREADING
