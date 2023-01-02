@@ -30,7 +30,7 @@ JACOBI_SDIAG_FILE="${DATA_DIR}/${JACOBI_SDIAG_FILE_PREFIX}${N_MOMS}${JACOBI_SDIA
 MOMENTS_FILE="${DATA_DIR}/${MOMENTS_FILE_PREFIX}${N_MOMS}${MOMENTS_FILE_SUFFIX}"
 
 ## EXECUTE
-./core_inversion_benchmark n_exec=$N_EXEC n_moms=$N_MOMS n_momsets=$N_MOMSETS setup_file=$SETUP_FILE \
+./qmom_core_inversion n_exec=$N_EXEC n_moms=$N_MOMS n_momsets=$N_MOMSETS setup_file=$SETUP_FILE \
     moments_file=$MOMENTS_FILE jacobi_diagonal_file=$JACOBI_DIAG_FILE jacobi_superdiagonal_file=$JACOBI_SDIAG_FILE \
     outfile_prefix=$OUTFILE_PREFIX \
     $MORE_ARGS
