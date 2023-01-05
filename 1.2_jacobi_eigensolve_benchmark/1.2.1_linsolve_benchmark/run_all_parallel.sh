@@ -4,7 +4,7 @@
 
 # Example:
 # --------
-# Presuming that this script is in the parent directory of the run directory (containing the `core_inversion_benchmark` executable and the setup file `setup.inp`), the command
+# Presuming that this script is in the parent directory of the run directory (containing the `qmom_linsolver` executable and the setup file `setup.inp`), the command
 #   `../run_all_parallel 4 4:20`
 # runs the application with 4,6,..,18,20 moments using 4 cores simulataneously.
 #

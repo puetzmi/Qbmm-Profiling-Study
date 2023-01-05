@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# This script executes the 'core_inversion_benchmark' application in the current working directory using the setup file 'setup.inp' (also in the working directory) as well as the parameters below. Besides the presence of the test file 'setup.inp' and the executable 'core_inversion_benchmark' in the working directory, it must be ensured that the data directory (see parameter `DATA_DIR`) exists and that it contains all the necessary input files. The only command line parameter required is the number of moments, which must be an even positive integer.
+# This script executes the 'qmom_linsolver' application in the current working directory using the setup file 'setup.inp' (also in the working directory) as well as the parameters below. Besides the presence of the test file 'setup.inp' and the executable 'qmom_linsolver' in the working directory, it must be ensured that the data directory (see parameter `DATA_DIR`) exists and that it contains all the necessary input files. The only command line parameter required is the number of moments, which must be an even positive integer.
 
 ## PARAMETERS
 N_MOMSETS=100000
@@ -30,7 +30,7 @@ QUADWEIGHTS_FILE="${DATA_DIR}/${QUADWEIGHTS_FILE_PREFIX}${N_MOMS}${QUADWEIGHTS_F
 MOMENTS_FILE="${DATA_DIR}/${MOMENTS_FILE_PREFIX}${N_MOMS}${MOMENTS_FILE_SUFFIX}"
 
 ## EXECUTE
-./linsolver_benchmark n_exec=$N_EXEC n_moms=$N_MOMS n_momsets=$N_MOMSETS setup_file=$SETUP_FILE \
+./qmom_linsolver n_exec=$N_EXEC n_moms=$N_MOMS n_momsets=$N_MOMSETS setup_file=$SETUP_FILE \
     moments_file=$MOMENTS_FILE quadrature_nodes_file=$QUADNODES_FILE quadrature_weights_file=$QUADWEIGHTS_FILE \
     outfile_prefix=$OUTFILE_PREFIX \
     $MORE_ARGS

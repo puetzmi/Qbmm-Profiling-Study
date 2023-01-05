@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# This script executes the 'eigensolver_benchmark_moments' application in the current working directory using the setup file 'setup.inp' (also in the working directory) as well as the parameters below. Besides the presence of the test file 'setup.inp' and the executable 'eigensolver_benchmark_moments' in the working directory, it must be ensured that the data directory (see parameter `DATA_DIR`) exists and that it contains all the necessary input files. The only command line parameter required is the number of moments, which must be an even positive integer though more arguments may be passed to the application.
+# This script executes the 'qmom_eigensolver' application in the current working directory using the setup file 'setup.inp' (also in the working directory) as well as the parameters below. Besides the presence of the test file 'setup.inp' and the executable 'qmom_eigensolver' in the working directory, it must be ensured that the data directory (see parameter `DATA_DIR`) exists and that it contains all the necessary input files. The only command line parameter required is the number of moments, which must be an even positive integer though more arguments may be passed to the application.
 
 ## PARAMETERS
 N_MOMSETS=100000
@@ -36,7 +36,7 @@ QUADNODES_FILE="${DATA_DIR}/${QUADNODES_FILE_PREFIX}${N_MOMS}${QUADNODES_FILE_SU
 QUADWEIGHTS_FILE="${DATA_DIR}/${QUADWEIGHTS_FILE_PREFIX}${N_MOMS}${QUADWEIGHTS_FILE_SUFFIX}"
 
 ## EXECUTE
-./eigensolver_benchmark_moments \
+./qmom_eigensolver \
     n_exec=$N_EXEC \
     n_moms=$N_MOMS \
     n_momsets=$N_MOMSETS \
