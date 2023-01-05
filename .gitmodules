@@ -1,0 +1,4 @@
+[submodule "qbmm-profiling-tools"]
+	path = qbmm-profiling-tools
+	url = git@gitlab.com:puetzm/qbmm-profiling-tools.git
+    ignore = dirty
