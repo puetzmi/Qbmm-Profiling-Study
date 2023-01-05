@@ -12,13 +12,13 @@ build/*
 *.log
 
 # Input data set
-data/*
+numerical-study/data/*
 
 # Output text files
 *.out
 
 # Figures generated from output data
-**/fig/
+numerical-study/**/fig/
 
 # Backup files
 *.bak
