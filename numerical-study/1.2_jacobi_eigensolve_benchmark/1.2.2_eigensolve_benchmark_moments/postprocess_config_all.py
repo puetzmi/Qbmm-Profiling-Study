@@ -7,14 +7,14 @@ Parameters for postprocessing script.
 data_file_pattern = "data_nmom"
 
 # Source directories and corresponding labels
-source_dirs = ["gnu_np1", "gnu_np6", "intel_np1", "intel_np6"]
-labels = ["GNU (1 core)", "GNU (6 cores)", "Intel (1 core)", "Intel (6 cores)"]
+source_dirs = ["intel_np1"]
+labels = ["Intel"]
 
 # Main directory for complete analysis
 main_dir = "intel_np1"
 
 # Directory containing the input data for the benchmark application
-data_dir = "../data"
+data_dir = "../../data"
 
 # Potential common prefix of all data files before `data_file_pattern`
 infile_prefix = ""
@@ -24,16 +24,29 @@ infile_suffix = ".out"
 
 # Dictionary that maps configuration names used in data files to labels used for plots
 config_to_label_map = { \
-                        "LqmdAlgorithm": "LQMDA", \
-                        "GolubWelschAlgorithmLapackPotrf": "GWA (MKL/LAPACK-POTRF)", \
-                        "GolubWelschAlgorithmLapackPotrf2": "GWA (MKL/LAPACK-POTRF2)", \
-                        "GolubWelschAlgorithmEigenlib": "GWA (Eigen3)", \
-                        "GolubWelschAlgorithmPlainCxx": "GWA (plain C++)"
+        "EigenTridiagonalSymmEigenlibQR None": \
+            "QR algorithm (Eigen)", \
+        "EigenTridiagonalSymmEigenlibQR LinearVandermondeSolver":
+            "QR algorithm (Eigen) + Vandermonde solver", \
+        "EigenTridiagonalSymmLapackQR None": \
+            "QR (LAPACK)", \
+        "EigenTridiagonalSymmLapackQR LinearVandermondeSolver": \
+            "QR algorithm (LAPACK) + Vandermonde solver", \
+        "EigenTridiagonalSymmLapackRRR None": \
+            "RRR algorithm (LAPACK)", \
+        "EigenTridiagonalSymmLapackRRR LinearVandermondeSolver": \
+            "RRR algorithm (LAPACK) + Vandermonde solver"
                      }
 
 # Dictionary that maps configuration names used in data files to labels used for plots
+_errors = [
+            "MomentsRelError2Norm", \
+            "MomentsRelErrorInfNorm", \
+            "QuadratureNodesRelError2Norm", \
+            "QuadratureWeightsRelError2Norm"
+            ]
 error_to_label_map = { \
-                        "JacobiMatrixRelErrorFrobeniusNorm": r"Error in Jacobi matrix (Frobenius norm)", \
+                        e: e for e in _errors
                       }
 
 # Target directory for output of figures
