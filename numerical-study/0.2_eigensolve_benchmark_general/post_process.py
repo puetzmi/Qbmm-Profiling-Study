@@ -11,7 +11,11 @@ except IndexError:
 
 # Read input data
 with open(input_file, 'r') as fi:
-    col_names = fi.readline().split()
+    comment = True
+    while comment:
+        line = fi.readline()
+        comment = line[0] == '#'
+    col_names = line.split()
 data = np.genfromtxt(input_file)
 matrix_size = np.round(data[:,0]).astype(int)
 cpu_times = data[:,1:]
