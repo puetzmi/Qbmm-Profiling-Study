@@ -24,17 +24,16 @@ infile_suffix = ".out"
 
 # Dictionary that maps configuration names used in data files to labels used for plots
 config_to_label_map = { \
-                        "LinearLapackGesvSolver": "LU decomposition", \
-                        "LinearEigenlibPartialPivLuSolver": "LU decomposition", \
+                        "LinearLapackGesvSolver": "LU decomposition (LAPACK)", \
+                        "LinearEigenlibPartialPivLuSolver": "LU decomposition (Eigen3)", \
                         "LinearVandermondeSolver": "Vandermonde solver"
                      }
 
 # Dictionary that maps configuration names used in data files to labels used for plots
 error_to_label_map = { \
                         "MomentsRelError2Norm": r"Rel. error in moments $||\mathbf{m}_{rerr}||_2$", \
-                        "MomentsRelError2Norm": r"Rel. error in moments $||\mathbf{m}_{rerr}||_{\infty}$", \
-                        "JacobiMatrixRelErrorFrobeniusNorm": r"Rel. error in weights " \
-                          "$||(\tilde{\mathbf{w}} - \mathbf{w})||_{2}/\mathbf{w}||_2$", \
+                        "MomentsRelErrorInfNorm": r"Rel. error in moments $||\mathbf{m}_{rerr}||_{\infty}$", \
+                        "WeightsRelError2Norm": r"Rel. error in weight vector",
                       }
 
 # Target directory for output of figures
