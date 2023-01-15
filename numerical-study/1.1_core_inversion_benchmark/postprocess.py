@@ -177,10 +177,12 @@ def postprocess():
     # Plot twice, once for all source directories (if > 1)
     # and once for specified main source directory
     source_dirs_all = source_dirs.copy()
+    labels_all = labels.copy()
     end = 1 if len(source_dirs) == 1 else 2
     for _ in range(end):
         ls_cycle = plot_tools.get_lscycle()
         linestyles = {label: next(ls_cycle) for label in labels}
+        ls_cycle = plot_tools.get_lscycle() # reset
         color_cycle = plot_tools.get_colorcycle()
         colors = {i: next(color_cycle) for i in np.unique(df["ConfigNo"])}
         linewidth = 1.
@@ -195,15 +197,16 @@ def postprocess():
         for label in labels:
             # Compute mean CPU time
             cpu_times = df_all[label].groupby(["nMoments", "ConfigNo"])["ComputingTime"]
-            cpu_times_mean = cpu_times.mean()
+            n_moment_sets = cpu_times.size().values[0]  # equal in all groups
+            cpu_times_sum = cpu_times.sum()
+            inversions_per_second = n_moment_sets/cpu_times_sum
 
             # Plot CPU times vs. number of moments
             for idx,name in summary.items():
                 lbl = config_to_label_map[name] if add_label else None
                 ls = linestyles[label] if len(labels) > 1 else next(ls_cycle)
-                cpu_times_mean[:idx]
-                colors[idx]
-                ax.semilogy(n_moments, cpu_times_mean[:,idx], label=lbl, c=colors[idx], ls=ls, lw=linewidth)
+                ax.semilogy(n_moments, inversions_per_second[:,idx],
+                        label=lbl, c=colors[idx], ls=ls, lw=linewidth)
 
             # Add labels only during the first iteration since the configurations are repeated
             add_label = False
@@ -214,7 +217,7 @@ def postprocess():
 
         ax.grid(which='both')
         ax.set_xlabel("Number of moments")
-        ax.set_ylabel("CPU time [s]")
+        ax.set_ylabel("Inversions per second")
         plot_tools.figure_legend(fig, ax, adjust_axes=True, linewidth=linewidth, vspace=4, rel_width=0.9)
 
         target_filename = os.path.join(target_dir, "cpu-times_nmom{0:s}".format(output_format))
@@ -224,31 +227,32 @@ def postprocess():
         print("\t{0:s}".format(target_filename))
         fig.savefig(target_filename)
         plt.close(fig)
+        labels = [labels[source_dirs.index(main_dir)]]
         source_dirs = [main_dir]
 
+    labels = labels_all.copy()
     source_dirs = source_dirs_all.copy()
 
 
     ## LOAD DATA FROM DATA DIRECTORY ##
     # quantities characterizing distance from moment space boundary
-    quantities = ["sigma-min", "regularity-radius", "hankel-determinant", "beta-coeffs", "mom2nm2-boundary-dist"]
-
+    boundary_dist_quantities = config.boundary_dist_quantities
     # Names of quantities (used as labels)
-    quantity_names = [r"$\sigma_{min}$", r"$r_{reg}$", r"$|H|$", r"$\beta_{min}$", "my new quantity"]
-    quantity_names = {quantities[i]: qn for i,qn in enumerate(quantity_names)}
+    boundary_dist_quantity_names = {boundary_dist_quantities[i]:
+        qn for i,qn in enumerate(config.boundary_dist_quantity_names)}
 
     # functions to apply to input data
-    funcs = {quantity: lambda x, _: x for quantity in quantities}
+    funcs = {quantity: lambda x, _: x for quantity in boundary_dist_quantities}
     funcs["hankel-determinant"] = lambda x, nmom: x**(2/nmom)
     funcs["beta-coeffs"] = lambda x, _: np.min(x[:,1:], axis=1)
-    assert(len(quantities) == len(funcs))   # make sure no additional entries have been created accidentally
+    assert(len(boundary_dist_quantities) == len(funcs))   # make sure no additional entries have been created accidentally
 
     # Read all original input data files
     main_key = labels[source_dirs.index(main_dir)]
     df_main = df_all[main_key]  # now consider only the specified main directory
     data_dir_files = [f for f in os.listdir(data_dir) if os.path.isfile(os.path.join(data_dir, f))]
     df_orig = []            # original input data in `data_dir`
-    for quantity in quantities:
+    for quantity in boundary_dist_quantities:
         df = []
         for n_mom in n_moments:
             pattern = "{0:s}_nmom{1:d}".format(quantity, n_mom)
@@ -286,12 +290,12 @@ def postprocess():
         assert(np.all(np.isfinite(df.values)))
         gmean[name] = {}
         for n_mom in n_moments:
-            df_ = df[df["nMoments"]==n_mom][error_keys + quantities]
+            df_ = df[df["nMoments"]==n_mom][error_keys + boundary_dist_quantities]
             gmean[name][n_mom] = {}
             for error_key in error_keys:
                 gmean[name][n_mom][error_key] = {}
                 y = np.maximum(df_[error_key], np.finfo(df_[error_key].dtype).eps)
-                for quantity in quantities:
+                for quantity in boundary_dist_quantities:
                     x = df_[quantity]
                     x[x==0] = np.min(x[x!=0])   # this case should be extremely rare and thus not make any visible difference
 
@@ -325,7 +329,7 @@ def postprocess():
                             marker='o', markersize=4, label="Conditional geometric mean")
                         ax.set_xlim(xlim)
                         ax.set_ylim(ylim)
-                        ax.set_xlabel(quantity_names[quantity])
+                        ax.set_xlabel(boundary_dist_quantity_names[quantity])
                         ax.set_ylabel(error_to_label_map[error_key])
                         ax.legend(loc='lower left')
                         left = fig.subplotpars.left
@@ -346,7 +350,7 @@ def postprocess():
 
     print("Plotting mean errors...")
     for error_key in error_keys:
-        for quantity in quantities:
+        for quantity in boundary_dist_quantities:
             for n_mom in n_moments:
                 ls_cycle = plot_tools.get_lscycle()
                 color_cycle = plot_tools.get_colorcycle()
@@ -359,7 +363,7 @@ def postprocess():
                 ax.set_xscale('log')
                 ax.set_yscale('log')
                 ax.grid(which='both')
-                ax.set_xlabel(quantity_names[quantity])
+                ax.set_xlabel(boundary_dist_quantity_names[quantity])
                 ax.set_ylabel(error_to_label_map[error_key])
                 ax.legend()
                 ax_corners = ax.get_tightbbox(fig.canvas.get_renderer()).corners()

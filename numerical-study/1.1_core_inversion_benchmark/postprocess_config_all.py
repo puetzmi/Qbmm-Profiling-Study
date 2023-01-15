@@ -36,6 +36,19 @@ error_to_label_map = { \
                         "JacobiMatrixRelErrorFrobeniusNorm": r"Error in Jacobi matrix (Frobenius norm)", \
                       }
 
+# Quantities used to measure distance to moment space boundary
+# (as in input filenames)
+boundary_dist_quantities = \
+  ["sigma-min", "regularity-radius", "hankel-determinant", "beta-coeffs", "mom2nm2-boundary-dist"]
+
+# Names / labels corresponding to `quantities`
+boundary_dist_quantity_names = \
+  [r"$\mathrm{\sigma_{min}}$", 
+   r"$\mathrm{r_{reg}}$",
+   r"det($\mathrm{\mathbf{M}_{2n-2}})$",
+   r"$\mathrm{\beta_{min}}$",
+   r"$\mathrm{d_{2n-2}}"]
+
 # Target directory for output of figures
 target_dir = "fig"
 
