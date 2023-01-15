@@ -7,6 +7,7 @@
 @param source-dir The source directory or a list of source directories in Python syntax
 
 @par Examples
+
 """
 import numpy as np
 import matplotlib as mpl
@@ -152,7 +153,7 @@ def postprocess():
             with open(summary_file, 'r') as fi:
                 lines = [line.split() for line in fi.readlines()]
                 lines = [line for line in lines[1:] if line and line[0] != '#']
-                s = {int(line[0]): line[1] for line in lines[1:]}
+                s = {int(line[0]): ' '.join(line[1:]) for line in lines[1:]}
             if not summary:
                 summary = s.copy()
             # Make sure the summary dictionary does not differ from the one in the previous iteration (something is wrong if it does)
@@ -166,53 +167,66 @@ def postprocess():
 
 
     ## PLOT AVERAGE CPU TIMES VS. NUMBER OF MOMENTS ##
-    ls_cycle = plot_tools.get_lscycle()
-    linestyles = {label: next(ls_cycle) for label in labels}
-    color_cycle = plot_tools.get_colorcycle()
-    colors = {i: next(color_cycle) for i in np.unique(df["ConfigNo"])}
-    linewidth = 1.
-
-    fig, ax = plot_tools.figure(shrink_axes=0.2)
-
-    # Use column headings for configuration labels if no map is provided
-    if not config_to_label_map:
-        config_to_label_map = {x: x for x in summary.values()}
-
-    add_label = True
-    for label in labels:
-        # Compute mean CPU time
-        cpu_times = df_all[label].groupby(["nMoments", "ConfigNo"])["ComputingTime"]
-        cpu_times_mean = cpu_times.mean()
-
-        # Plot CPU times vs. number of moments
-        for idx,name in summary.items():
-            lbl = config_to_label_map[name] if add_label else None
-            ls = linestyles[label] if len(labels) > 1 else next(ls_cycle)
-            cpu_times_mean[:idx]
-            colors[idx]
-            ax.semilogy(n_moments, cpu_times_mean[:,idx], label=lbl, c=colors[idx], ls=ls, lw=linewidth)
-
-        # Add labels only during the first iteration since the configurations are repeated
-        add_label = False
-
-    if len(source_dirs) > 1:
-        plot_tools.linestyle_legend(ax, linestyles=linestyles.values(), labels=labels, \
-            lw=linewidth, layout='vertical', ncol=2)
-
-    ax.grid(which='both')
-    ax.set_xlabel("Number of moments")
-    ax.set_ylabel("CPU time [s]")
-    plot_tools.figure_legend(fig, ax, adjust_axes=True, linewidth=linewidth, vspace=4, rel_width=0.9)
-
+    print("Plotting average CPU times...")
     # Create target directory if it does not exist
     if not os.path.exists(target_dir):
         os.mkdir(target_dir)
     elif not os.path.isdir(target_dir):
         msg = "The specified target directory name '{0:s}' exists but is not a directory.".format(target_dir)
         raise OSError(msg)
+    # Plot twice, once for all source directories (if > 1)
+    # and once for specified main source directory
+    source_dirs_all = source_dirs.copy()
+    end = 1 if len(source_dirs) == 1 else 2
+    for _ in range(end):
+        ls_cycle = plot_tools.get_lscycle()
+        linestyles = {label: next(ls_cycle) for label in labels}
+        color_cycle = plot_tools.get_colorcycle()
+        colors = {i: next(color_cycle) for i in np.unique(df["ConfigNo"])}
+        linewidth = 1.
 
-    fig.savefig(os.path.join(target_dir, "cpu_times-n_mom{0:s}".format(output_format)))
-    plt.close(fig)
+        fig, ax = plot_tools.figure(shrink_axes=0.2)
+
+        # Use column headings for configuration labels if no map is provided
+        if not config_to_label_map:
+            config_to_label_map = {x: x for x in summary.values()}
+
+        add_label = True
+        for label in labels:
+            # Compute mean CPU time
+            cpu_times = df_all[label].groupby(["nMoments", "ConfigNo"])["ComputingTime"]
+            cpu_times_mean = cpu_times.mean()
+
+            # Plot CPU times vs. number of moments
+            for idx,name in summary.items():
+                lbl = config_to_label_map[name] if add_label else None
+                ls = linestyles[label] if len(labels) > 1 else next(ls_cycle)
+                cpu_times_mean[:idx]
+                colors[idx]
+                ax.semilogy(n_moments, cpu_times_mean[:,idx], label=lbl, c=colors[idx], ls=ls, lw=linewidth)
+
+            # Add labels only during the first iteration since the configurations are repeated
+            add_label = False
+
+        if len(source_dirs) > 1:
+            plot_tools.linestyle_legend(ax, linestyles=linestyles.values(), labels=labels, \
+                lw=linewidth, layout='vertical', ncol=2)
+
+        ax.grid(which='both')
+        ax.set_xlabel("Number of moments")
+        ax.set_ylabel("CPU time [s]")
+        plot_tools.figure_legend(fig, ax, adjust_axes=True, linewidth=linewidth, vspace=4, rel_width=0.9)
+
+        target_filename = os.path.join(target_dir, "cpu-times_nmom{0:s}".format(output_format))
+        if len(source_dirs) > 1:
+            target_filename = \
+                target_filename.replace(output_format, "__all{0:s}".format(output_format))
+        print("\t{0:s}".format(target_filename))
+        fig.savefig(target_filename)
+        plt.close(fig)
+        source_dirs = [main_dir]
+
+    source_dirs = source_dirs_all.copy()
 
 
     ## LOAD DATA FROM DATA DIRECTORY ##
@@ -261,6 +275,7 @@ def postprocess():
 
     ## PLOT HISTOGRAMS OF ERRORS ##
     # Plot all columns whose keys contain 'error'
+    print("Computing {0:s}histograms...".format("and plotting " if plot_histograms else ""))
     error_keys = [col for col in df_main.columns if col.lower().find("error") > -1]
     ls_cycle = plot_tools.get_lscycle()
     color_cycle = plot_tools.get_colorcycle()
@@ -293,35 +308,43 @@ def postprocess():
                             np.log2(np.min(x)), np.log2(np.max(x)), n_hist_bins[0] + 1
                             )
 
-                    x_data = 0.5*(x_bins[1:] + x_bins[:-1]) 
+                    x_data = 0.5*(x_bins[1:] + x_bins[:-1])
                     x_bins[0] = 0.
                     x_bins[-1] *= 1 + np.finfo(x_bins.dtype).eps
-                    y_gmean = np.zeros_like(x_data) 
+                    y_gmean = np.zeros_like(x_data)
                     for i in range(len(x_data)):
                         idx = (x >= x_bins[i]) & (x < x_bins[i+1])
                         y_gmean[i] = 2**np.mean(np.log2(y[idx]))
                     gmean[name][n_mom][error_key][quantity] = (x_data, np.array(y_gmean))
-                    
+
                     if plot_histograms:
                         xlim = ax.get_xlim()
                         ylim = ax.get_ylim()
                         not_nan = ~np.isnan(y_gmean) # may happen in empty bins
-                        ax.loglog(x_data[not_nan], y_gmean[not_nan], color='k', 
-                            marker='o', label="Geometric mean")
+                        ax.loglog(x_data[not_nan], y_gmean[not_nan], color='k',
+                            marker='o', markersize=4, label="Conditional geometric mean")
                         ax.set_xlim(xlim)
                         ax.set_ylim(ylim)
                         ax.set_xlabel(quantity_names[quantity])
                         ax.set_ylabel(error_to_label_map[error_key])
-                        ax.set_title("nmom = {0:d}".format(n_mom))
                         ax.legend(loc='lower left')
                         left = fig.subplotpars.left
                         right = fig.subplotpars.right
                         fig.tight_layout()
                         fig.subplots_adjust(right=right, left=left)
                         fig.colorbar(contour)
-                        plt.show()
-                    
+                        target_filename = os.path.join(target_dir, \
+                                "hist__{0:s}_{1:s}__nmom{2:d}__{3:s}{4:s}".format( \
+                                quantity, \
+                                error_key, \
+                                n_mom, \
+                                name, \
+                                output_format))
+                        print("\n\t{0:s}".format(target_filename))
+                        fig.savefig(target_filename)
+                        plt.close(fig)
 
+    print("Plotting mean errors...")
     for error_key in error_keys:
         for quantity in quantities:
             for n_mom in n_moments:
@@ -338,13 +361,21 @@ def postprocess():
                 ax.grid(which='both')
                 ax.set_xlabel(quantity_names[quantity])
                 ax.set_ylabel(error_to_label_map[error_key])
-                ax.set_title("nmom = {0:d}".format(n_mom))
                 ax.legend()
                 ax_corners = ax.get_tightbbox(fig.canvas.get_renderer()).corners()
                 fig_height = fig.canvas.get_width_height()[1]
                 bottom = ax_corners[0,1]/fig_height
                 fig.subplots_adjust(bottom=0.2)
-                plt.show()
+                target_filename = os.path.join(target_dir, \
+                        "mean-errors__{0:s}_{1:s}__nmom{2:d}{3:s}".format( \
+                        quantity, \
+                        error_key, \
+                        n_mom, \
+                        output_format))
+                print("\n\t{0:s}".format(target_filename))
+                fig.savefig(target_filename)
+                plt.close(fig)
+                #plt.show()
                 #fig.tight_layout()
                 #plot_tools.figure_legend(fig, ax, adjust_axes=True, linewidth=linewidth, vspace=4, rel_width=0.9)
                 #plot_tools.figure_legend(fig, ax, adjust_axes=True, linewidth=linewidth, vspace=4, rel_width=0.9)
