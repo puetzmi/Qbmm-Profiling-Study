@@ -43,11 +43,11 @@ boundary_dist_quantities = \
 
 # Names / labels corresponding to `quantities`
 boundary_dist_quantity_names = \
-  [r"$\mathrm{\sigma_{min}}$", 
+  [r"$\mathrm{\sigma_{min}}$",
    r"$\mathrm{r_{reg}}$",
    r"det($\mathrm{\mathbf{M}_{2n-2}})$",
    r"$\mathrm{\beta_{min}}$",
-   r"$\mathrm{d_{2n-2}}"]
+   r"$\mathrm{d_{2n-2}}$"]
 
 # Target directory for output of figures
 target_dir = "fig"
