@@ -1,0 +1,25 @@
+qmomTypes = {
+                "QmomStd",
+                "QmomGaG",
+};
+
+coreInversionTypes = {
+                        LqmdAlgorithm,
+                        GolubWelschAlgorithmLapackPotrf,
+};
+
+eigenSolverTypes = {
+                        //"EigenTridiagonalSymmEigenlibQR",
+                        "EigenTridiagonalSymmLapackQR",
+};
+                        
+linearSolverTypes = {
+                        "None",
+                        //"LinearVandermondeSolver",
+};
+
+physicalModelTypes = {
+                        "FokkerPlanckConstantCd",
+                        "FokkerPlanckVelocityDependentCd",
+                        "HardSphereCollision1D",
+};
