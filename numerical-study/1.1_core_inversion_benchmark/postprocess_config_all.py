@@ -33,21 +33,28 @@ config_to_label_map = { \
 
 # Dictionary that maps configuration names used in data files to labels used for plots
 error_to_label_map = { \
-                        "JacobiMatrixRelErrorFrobeniusNorm": r"Error in Jacobi matrix (Frobenius norm)", \
+                        "JacobiMatrixRelErrorFrobeniusNorm": "Rel. Jacobi \nmatrix error (Frobenius norm)", \
                       }
 
 # Quantities used to measure distance to moment space boundary
 # (as in input filenames)
-boundary_dist_quantities = \
-  ["sigma-min", "regularity-radius", "hankel-determinant", "beta-coeffs", "mom2nm2-boundary-dist"]
+boundary_dist_quantities = ["regularity-radius"]
+  #["sigma-min", "regularity-radius", "hankel-determinant", "beta-coeffs", "mom2nm2-boundary-dist"]
 
 # Names / labels corresponding to `quantities`
-boundary_dist_quantity_names = \
+boundary_dist_quantity_names = [r"$\mathrm{r_{reg}(\mathbf{M}_{2n-2})}$"]
+"""
   [r"$\mathrm{\sigma_{min}}$",
    r"$\mathrm{r_{reg}}$",
    r"det($\mathrm{\mathbf{M}_{2n-2}})$",
    r"$\mathrm{\beta_{min}}$",
    r"$\mathrm{d_{2n-2}}$"]
+"""
+
+# functions to apply to input data
+funcs = {quantity: lambda x, _: x for quantity in boundary_dist_quantities}
+#funcs["hankel-determinant"] = lambda x, nmom: x**(2/nmom)
+#funcs["beta-coeffs"] = lambda x, _: np.min(x[:,1:], axis=1)
 
 # Target directory for output of figures
 target_dir = "fig"
