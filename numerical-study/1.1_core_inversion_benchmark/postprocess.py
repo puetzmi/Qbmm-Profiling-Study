@@ -94,13 +94,13 @@ def postprocess():
     except AttributeError:
         output_format = ".png"
 
-    # Number of bins in 2D-histogram
+    # Number of bins in 2D-histogram (currently unused)
     try:
         n_hist_bins = config.n_hist_bins
     except AttributeError:
         n_hist_bins = (20, 20)
 
-    # Number of levels in contour plots
+    # Number of levels in contour plots (currently unused)
     try:
         n_contour_levels = config.n_contour_levels
     except AttributeError:
@@ -112,7 +112,7 @@ def postprocess():
     except AttributeError:
         color_map = "coolwarm"
 
-    # Indicate whether or not to plot histograms of errors (may take a long time)
+    # Indicate whether or not to plot histograms of errors, which may take some time
     try:
         plot_histograms = config.plot_histograms
     except AttributeError:
@@ -242,9 +242,7 @@ def postprocess():
         qn for i,qn in enumerate(config.boundary_dist_quantity_names)}
 
     # functions to apply to input data
-    funcs = {quantity: lambda x, _: x for quantity in boundary_dist_quantities}
-    funcs["hankel-determinant"] = lambda x, nmom: x**(2/nmom)
-    funcs["beta-coeffs"] = lambda x, _: np.min(x[:,1:], axis=1)
+    funcs = config.funcs
     assert(len(boundary_dist_quantities) == len(funcs))   # make sure no additional entries have been created accidentally
 
     # Read all original input data files
@@ -302,11 +300,27 @@ def postprocess():
                     if plot_histograms:
                         fig, ax = plt.subplots()
                         z_func = lambda z: z + 0.1*np.min(z[z!=0])*(z==0).astype(int)   # replace zeros before taking logarithm for histogram plot
+                        """
                         contour, hist, x_bins, y_bins = plot_tools.contour_hist2d(ax, x, y, \
                             x_scale='log', y_scale='log', z_scale='log', cmap=color_map, \
                             levels=n_contour_levels, bins=n_hist_bins, z_func=z_func, \
                             return_hist_data=True, normalize=True)
+                        """
+                        log10_x = np.log10(x)
+                        x_bins = np.logspace(np.min(log10_x), np.max(log10_x),
+                                n_hist_bins[0] + 1)
+                        log10_y = np.log10(y)
+                        y_bins = np.logspace(np.min(log10_y), np.max(log10_y),
+                                n_hist_bins[1] + 1)
+                        hist, _, _ = np.histogram2d(x, y, bins=[x_bins, y_bins])
                         hist /= len(x)  # normalize
+
+                        fig = plt.figure()
+                        ax = fig.add_subplot(111)
+                        contour = ax.hexbin(x, y, xscale='log', yscale='log',
+                                bins='log', cmap=color_map)
+                        #plt.show()
+                        #plt.close(fig1)
                     else:
                         x_bins = 2**np.linspace(
                             np.log2(np.min(x)), np.log2(np.max(x)), n_hist_bins[0] + 1
@@ -327,11 +341,12 @@ def postprocess():
                         not_nan = ~np.isnan(y_gmean) # may happen in empty bins
                         ax.loglog(x_data[not_nan], y_gmean[not_nan], color='k',
                             marker='o', markersize=4, label="Conditional geometric mean")
-                        ax.set_xlim(xlim)
+                        ax.set_xlim(x_data[not_nan][0], x_data[not_nan][-1])
                         ax.set_ylim(ylim)
                         ax.set_xlabel(boundary_dist_quantity_names[quantity])
                         ax.set_ylabel(error_to_label_map[error_key])
                         ax.legend(loc='lower left')
+                        ax.grid(which='both')
                         left = fig.subplotpars.left
                         right = fig.subplotpars.right
                         fig.tight_layout()
