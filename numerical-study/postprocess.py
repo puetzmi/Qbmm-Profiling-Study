@@ -2,9 +2,10 @@
 """!
 @file postprocess.py
 @author M. Puetz
-@brief This script generates plots of benchmark results including errors. It is primarily used to postprocess results of the cases 1.1 and 1.2. The script requires a configuration file `postprocess_config.py` in the working directory, see e.g. 1.1_core_inversion_benchmark for an example.
+@brief This script generates plots of benchmark results including errors. It is primarily used to postprocess results of the cases 1.1 and 1.2. The script requires a configuration file `postprocess_config.py` or one with an alternative name (provided as command line parameter) in the working directory, see e.g. 1.1_core_inversion_benchmark for an example.
 
 """
+import importlib
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -23,10 +24,21 @@ def postprocess():
 
     """
     try:
-        import postprocess_config as config
-    except ModuleNotFoundError as err:
-        err.msg = "A 'postprocess_config.py' must be provided to run postprocessing script, see this script's documentation for more information."
-        raise err
+        config_module = sys.argv[1]
+        importlib.import_module(config_module)
+    except IndexError:
+        try:
+            import postprocess_config as config
+        except ModuleNotFoundError as err:
+            err.msg = "A 'postprocess_config.py' must be provided to run postprocessing script."
+            raise err
+
+    # Adjust size to number of columns
+    try:
+        n_fig_columns = config.n_fig_columns
+    except:
+        n_fig_columns = 1
+    plt.rcParams['figure.figsize'][0] /= n_fig_columns
 
     ## READ PARAMETERS ##
     # Source directories
@@ -345,7 +357,7 @@ def postprocess():
                         ax.set_ylim(ylim)
                         ax.set_xlabel(boundary_dist_quantity_names[quantity])
                         ax.set_ylabel(error_to_label_map[error_key])
-                        ax.legend(loc='lower left')
+                        ax.legend(loc='best')
                         ax.grid(which='both')
                         left = fig.subplotpars.left
                         right = fig.subplotpars.right
@@ -380,7 +392,7 @@ def postprocess():
                 ax.grid(which='both')
                 ax.set_xlabel(boundary_dist_quantity_names[quantity])
                 ax.set_ylabel(error_to_label_map[error_key])
-                ax.legend()
+                ax.legend(loc='best')
                 ax_corners = ax.get_tightbbox(fig.canvas.get_renderer()).corners()
                 fig_height = fig.canvas.get_width_height()[1]
                 bottom = ax_corners[0,1]/fig_height

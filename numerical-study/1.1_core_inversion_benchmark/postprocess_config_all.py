@@ -62,5 +62,8 @@ target_dir = "fig"
 # Output format
 output_format = ".pdf"
 
-# Plot histograms?
+# Plot histograms
 plot_histograms = True
+
+# Number of columns in figures (only to adjust figure size)
+n_fig_columns = 2
