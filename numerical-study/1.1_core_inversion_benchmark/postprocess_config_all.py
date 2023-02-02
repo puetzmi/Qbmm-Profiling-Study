@@ -32,8 +32,8 @@ config_to_label_map = { \
                      }
 
 # Dictionary that maps configuration names used in data files to labels used for plots
-error_to_label_map = { \
-                        "JacobiMatrixRelErrorFrobeniusNorm": "Rel. Jacobi \nmatrix error (Frobenius norm)", \
+output_qty_to_label_map = { \
+                        "JacobiMatrixRelErrorFrobeniusNorm": "Rel. Jacobi matrix error\n(Frobenius norm)", \
                       }
 
 # Quantities used to measure distance to moment space boundary
@@ -66,4 +66,4 @@ output_format = ".pdf"
 plot_histograms = True
 
 # Number of columns in figures (only to adjust figure size)
-n_fig_columns = 2
+n_fig_columns = 1

@@ -18,20 +18,13 @@ sys.path.append(os.getcwd())
 import plot_tools
 
 
-def postprocess():
+def postprocess(config_module):
     """!
     @brief Main function.
 
     """
-    try:
-        config_module = sys.argv[1]
-        importlib.import_module(config_module)
-    except IndexError:
-        try:
-            import postprocess_config as config
-        except ModuleNotFoundError as err:
-            err.msg = "A 'postprocess_config.py' must be provided to run postprocessing script."
-            raise err
+
+    config = config_module
 
     # Adjust size to number of columns
     try:
@@ -94,11 +87,11 @@ def postprocess():
     except AttributeError:
         config_to_label_map = None
 
-    # Optional dictionary that maps the error keys in the data files representing to strings used as labels in plots
+    # Optional dictionary that maps the keys in the data files representing to strings used as labels in plots
     try:
-        error_to_label_map = config.error_to_label_map
+        output_qty_to_label_map = config.output_qty_to_label_map
     except AttributeError:
-        error_to_label_map = None
+        output_qty_to_label_map = None
 
     # Output format of figures (default: png)
     try:
@@ -124,7 +117,7 @@ def postprocess():
     except AttributeError:
         color_map = "coolwarm"
 
-    # Indicate whether or not to plot histograms of errors, which may take some time
+    # Indicate whether or not to plot histograms of selected quantities, which may take some time
     try:
         plot_histograms = config.plot_histograms
     except AttributeError:
@@ -288,9 +281,9 @@ def postprocess():
 
 
     ## PLOT HISTOGRAMS OF ERRORS ##
-    # Plot all columns whose keys contain 'error'
+    # Plot all histograms of output quantities
     print("Computing {0:s}histograms...".format("and plotting " if plot_histograms else ""))
-    error_keys = list(error_to_label_map.keys()) #[col for col in df_main.columns if col.lower().find("error") > -1]
+    output_qty_keys = list(output_qty_to_label_map.keys())
     ls_cycle = plot_tools.get_lscycle()
     color_cycle = plot_tools.get_colorcycle()
     gmean = {}
@@ -300,24 +293,16 @@ def postprocess():
         assert(np.all(np.isfinite(df.values)))
         gmean[name] = {}
         for n_mom in n_moments:
-            df_ = df[df["nMoments"]==n_mom][error_keys + boundary_dist_quantities]
+            df_ = df[df["nMoments"]==n_mom][output_qty_keys + boundary_dist_quantities]
             gmean[name][n_mom] = {}
-            for error_key in error_keys:
-                gmean[name][n_mom][error_key] = {}
-                y = np.maximum(df_[error_key], np.finfo(df_[error_key].dtype).eps)
+            for output_qty_key in output_qty_keys:
+                gmean[name][n_mom][output_qty_key] = {}
+                y = np.maximum(df_[output_qty_key], np.finfo(df_[output_qty_key].dtype).eps)
                 for quantity in boundary_dist_quantities:
                     x = df_[quantity]
                     x[x==0] = np.min(x[x!=0])   # this case should be extremely rare and thus not make any visible difference
 
                     if plot_histograms:
-                        fig, ax = plt.subplots()
-                        z_func = lambda z: z + 0.1*np.min(z[z!=0])*(z==0).astype(int)   # replace zeros before taking logarithm for histogram plot
-                        """
-                        contour, hist, x_bins, y_bins = plot_tools.contour_hist2d(ax, x, y, \
-                            x_scale='log', y_scale='log', z_scale='log', cmap=color_map, \
-                            levels=n_contour_levels, bins=n_hist_bins, z_func=z_func, \
-                            return_hist_data=True, normalize=True)
-                        """
                         log10_x = np.log10(x)
                         x_bins = np.logspace(np.min(log10_x), np.max(log10_x),
                                 n_hist_bins[0] + 1)
@@ -329,10 +314,8 @@ def postprocess():
 
                         fig = plt.figure()
                         ax = fig.add_subplot(111)
-                        contour = ax.hexbin(x, y, xscale='log', yscale='log',
+                        hexbin = ax.hexbin(x, y, xscale='log', yscale='log',
                                 bins='log', cmap=color_map)
-                        #plt.show()
-                        #plt.close(fig1)
                     else:
                         x_bins = 2**np.linspace(
                             np.log2(np.min(x)), np.log2(np.max(x)), n_hist_bins[0] + 1
@@ -345,7 +328,7 @@ def postprocess():
                     for i in range(len(x_data)):
                         idx = (x >= x_bins[i]) & (x < x_bins[i+1])
                         y_gmean[i] = 2**np.mean(np.log2(y[idx]))
-                    gmean[name][n_mom][error_key][quantity] = (x_data, np.array(y_gmean))
+                    gmean[name][n_mom][output_qty_key][quantity] = (x_data, np.array(y_gmean))
 
                     if plot_histograms:
                         xlim = ax.get_xlim()
@@ -356,18 +339,18 @@ def postprocess():
                         ax.set_xlim(x_data[not_nan][0], x_data[not_nan][-1])
                         ax.set_ylim(ylim)
                         ax.set_xlabel(boundary_dist_quantity_names[quantity])
-                        ax.set_ylabel(error_to_label_map[error_key])
+                        ax.set_ylabel(output_qty_to_label_map[output_qty_key])
                         ax.legend(loc='best')
                         ax.grid(which='both')
                         left = fig.subplotpars.left
                         right = fig.subplotpars.right
                         fig.tight_layout()
                         fig.subplots_adjust(right=right, left=left)
-                        fig.colorbar(contour)
+                        fig.colorbar(hexbin)
                         target_filename = os.path.join(target_dir, \
                                 "hist__{0:s}_{1:s}__nmom{2:d}__{3:s}{4:s}".format( \
                                 quantity, \
-                                error_key, \
+                                output_qty_key, \
                                 n_mom, \
                                 re.sub('[^a-zA-Z0-9 \n\.]', '-', name), \
                                 output_format))
@@ -375,15 +358,15 @@ def postprocess():
                         fig.savefig(target_filename)
                         plt.close(fig)
 
-    print("Plotting mean errors...")
-    for error_key in error_keys:
+    print("Plotting mean output quantities...")
+    for output_qty_key in output_qty_keys:
         for quantity in boundary_dist_quantities:
             for n_mom in n_moments:
                 ls_cycle = plot_tools.get_lscycle()
                 color_cycle = plot_tools.get_colorcycle()
                 fig, ax = plot_tools.figure(shrink_axes=0.2)
                 for idx, name in summary.items():
-                    x_data, err_data = gmean[name][n_mom][error_key][quantity]
+                    x_data, err_data = gmean[name][n_mom][output_qty_key][quantity]
                     idx = ~np.isnan(err_data)
                     ax.errorbar(x_data[idx], err_data[idx], lw=linewidth, ls=next(ls_cycle), \
                         c=next(color_cycle), label=config_to_label_map[name])
@@ -391,16 +374,16 @@ def postprocess():
                 ax.set_yscale('log')
                 ax.grid(which='both')
                 ax.set_xlabel(boundary_dist_quantity_names[quantity])
-                ax.set_ylabel(error_to_label_map[error_key])
+                ax.set_ylabel(output_qty_to_label_map[output_qty_key])
                 ax.legend(loc='best')
                 ax_corners = ax.get_tightbbox(fig.canvas.get_renderer()).corners()
                 fig_height = fig.canvas.get_width_height()[1]
                 bottom = ax_corners[0,1]/fig_height
                 fig.subplots_adjust(bottom=0.2)
                 target_filename = os.path.join(target_dir, \
-                        "mean-errors__{0:s}_{1:s}__nmom{2:d}{3:s}".format( \
+                        "mean__{0:s}_{1:s}__nmom{2:d}{3:s}".format( \
                         quantity, \
-                        error_key, \
+                        output_qty_key, \
                         n_mom, \
                         output_format))
                 print("\n\t{0:s}".format(target_filename))
@@ -413,4 +396,13 @@ def postprocess():
 
 
 if __name__ == "__main__":
-    postprocess()
+    try:
+        config_file = sys.argv[1]
+        config_module = importlib.import_module(config_file.replace('.py',''))
+    except IndexError:
+        try:
+            import postprocess_config as config_module
+        except ModuleNotFoundError as err:
+            err.msg = "A 'postprocess_config.py' must be provided to run postprocessing script."
+            raise err
+    postprocess(config_module)
