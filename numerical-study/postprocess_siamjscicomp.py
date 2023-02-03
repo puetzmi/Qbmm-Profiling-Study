@@ -215,7 +215,7 @@ def postprocess_siam(config_module):
 
         ax.grid(which='both')
         ax.set_xlabel("Number of moments")
-        ax.set_ylabel("Inversions per second")
+        ax.set_ylabel("Executions per second")
         plot_tools.figure_legend(fig, ax, adjust_axes=True, linewidth=linewidth, vspace=4, rel_width=0.9)
 
         target_filename = os.path.join(target_dir, "cpu-times_nmom{0:s}".format(output_format))
@@ -377,7 +377,7 @@ def postprocess_siam(config_module):
                             for i_nmom, nmom in enumerate(nmom_pair):
                                 df_nmom = df[df["nMoments"]==nmom]
                                 x = df_nmom[quantity]
-                                y = np.maximum(df_nmom[output_qty_key], 
+                                y = np.maximum(df_nmom[output_qty_key],
                                             np.finfo(df_nmom[output_qty_key].dtype).eps)
                                 ax = axs[i_nmom,i_comptype]
                                 f, a = plt.subplots()
@@ -396,7 +396,7 @@ def postprocess_siam(config_module):
                             for i_nmom, nmom in enumerate(nmom_pair):
                                 df_nmom = df[df["nMoments"]==nmom]
                                 x = df_nmom[quantity]
-                                y = np.maximum(df_nmom[output_qty_key], 
+                                y = np.maximum(df_nmom[output_qty_key],
                                             np.finfo(df_nmom[output_qty_key].dtype).eps)
                                 ax = axs[i_nmom,i_comptype]
                                 h = ax.hexbin(x, y, xscale='log', yscale='log', bins='log',
@@ -414,7 +414,7 @@ def postprocess_siam(config_module):
                         fig.subplots_adjust(wspace=0.05)
 
                         for ax in axs.values():
-                            ax.grid(which='both') 
+                            ax.grid(which='both')
                         fig.colorbar(h, ax=list(axs.values()), shrink=0.5, location='bottom')
 
                         fig.text(0.04, 0.62, output_qty_to_label_map[output_qty_key].replace('\n', ' '),
@@ -510,5 +510,4 @@ if __name__ == "__main__":
         except ModuleNotFoundError as err:
             err.msg = "A 'postprocess_config.py' must be provided to run postprocessing script."
             raise err
-    config_module.plot_histograms = False
     postprocess_siam(config_module)
