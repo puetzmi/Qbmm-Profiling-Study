@@ -347,7 +347,7 @@ def postprocess_siam(config_module):
                                 nmom, \
                                 re.sub('[^a-zA-Z0-9 \n\.]', '-', comptype), \
                                 output_format))
-                        print("\n\t{0:s}".format(target_filename))
+                        print("\t{0:s}".format(target_filename))
                         fig.savefig(target_filename)
                         plt.close(fig)
 
@@ -356,65 +356,80 @@ def postprocess_siam(config_module):
     mean_comptype_pairs = config.mean_comptype_pairs
 
     print("Plotting selected histograms in 2-by-2 figures")
-    for output_qty_key in output_qty_keys:
-        for quantity in boundary_dist_quantities:
-            for comptype_pair in mean_comptype_pairs:
-                print(mean_nmom_pairs)
-                for nmom_pair in mean_nmom_pairs:
-                    print(nmom_pair)
-                    ax_keys = [(i,j) for i in range(2) for j in range(2)]
-                    fig, axs = plot_tools.figure_2by2(ax_keys)
+    if True: #plot_histograms:
+        for output_qty_key in output_qty_keys:
+            for quantity in boundary_dist_quantities:
+                for comptype_pair in mean_comptype_pairs:
+                    for nmom_pair in mean_nmom_pairs:
+                        ax_keys = [(i,j) for i in range(2) for j in range(2)]
+                        fig, axs = plot_tools.figure_2by2(ax_keys)
 
-                    # First generate hexbin plots to find out common limits
-                    # (inefficient, but the simplest way)
-                    vmin = 1e300
-                    vmax = -1e300
-                    xlim = {nmom: [-1e300, 1e300] for nmom in nmom_pair}
-                    ylim = {nmom: [-1e300, 1e300] for nmom in nmom_pair}
-                    for i_comptype, comptype in enumerate(comptype_pair):
-                        idx = list(summary.keys())[list(summary.values()).index(comptype)]
-                        df = pd.concat([df_main[df_main["ConfigNo"] \
-                            == idx].reset_index(drop=True), df_orig], axis=1)
-                        for i_nmom, nmom in enumerate(nmom_pair):
-                            df_nmom = df[df["nMoments"]==nmom]
-                            x = df_nmom[quantity]
-                            y = np.maximum(df_nmom[output_qty_key], 
-                                           np.finfo(df_nmom[output_qty_key].dtype).eps)
-                            ax = axs[i_nmom,i_comptype]
-                            f, a = plt.subplots()
-                            h = a.hexbin(x, y, xscale='log', yscale='log', bins='log', cmap=color_map)
-                            vmin = min(h.norm.vmin, vmin)
-                            vmax = max(h.norm.vmax, vmax)
-                            for ilim,func in enumerate([min, max]):
-                                xlim[nmom][ilim] = func(xlim[nmom][ilim], a.get_xlim()[ilim])
-                                ylim[nmom][ilim] = func(ylim[nmom][ilim], a.get_ylim()[ilim])
-                            plt.close(f)
+                        # First generate hexbin plots to find out common limits
+                        # (inefficient, but the simplest way)
+                        vmin = 1e300
+                        vmax = -1e300
+                        xlim = {nmom: [1e300, -1e300] for nmom in nmom_pair}
+                        ylim = {nmom: [1e300, -1e300] for nmom in nmom_pair}
+                        for i_comptype, comptype in enumerate(comptype_pair):
+                            idx = list(summary.keys())[list(summary.values()).index(comptype)]
+                            df = pd.concat([df_main[df_main["ConfigNo"] \
+                                == idx].reset_index(drop=True), df_orig], axis=1)
+                            for i_nmom, nmom in enumerate(nmom_pair):
+                                df_nmom = df[df["nMoments"]==nmom]
+                                x = df_nmom[quantity]
+                                y = np.maximum(df_nmom[output_qty_key], 
+                                            np.finfo(df_nmom[output_qty_key].dtype).eps)
+                                ax = axs[i_nmom,i_comptype]
+                                f, a = plt.subplots()
+                                h = a.hexbin(x, y, xscale='log', yscale='log', bins='log', cmap=color_map)
+                                vmin = min(h.norm.vmin, vmin)
+                                vmax = max(h.norm.vmax, vmax)
+                                for ilim,func in enumerate([min, max]):
+                                    xlim[nmom][ilim] = func(xlim[nmom][ilim], a.get_xlim()[ilim])
+                                    ylim[nmom][ilim] = func(ylim[nmom][ilim], a.get_ylim()[ilim])
+                                plt.close(f)
 
-                    for i_comptype, comptype in enumerate(comptype_pair):
-                        idx = list(summary.keys())[list(summary.values()).index(comptype)]
-                        df = pd.concat([df_main[df_main["ConfigNo"] \
-                            == idx].reset_index(drop=True), df_orig], axis=1)
-                        for i_nmom, nmom in enumerate(nmom_pair):
-                            df_nmom = df[df["nMoments"]==nmom]
-                            x = df_nmom[quantity]
-                            y = np.maximum(df_nmom[output_qty_key], 
-                                           np.finfo(df_nmom[output_qty_key].dtype).eps)
-                            ax = axs[i_nmom,i_comptype]
-                            h = ax.hexbin(x, y, xscale='log', yscale='log', bins='log',
-                                          cmap=color_map, vmin=vmin, vmax=vmax)
-                            x_data, y_gmean = gmean[comptype][nmom][output_qty_key][quantity]
-                            not_nan = ~np.isnan(y_gmean) # may happen in empty bins
-                            ax.loglog(x_data[not_nan], y_gmean[not_nan], color='k',
-                                marker='o', markersize=4, label="Conditional geometric mean")
-                            print(xlim[nmom])
-                            print(ylim[nmom])
-                            #ax.set_xlim(xlim[nmom])
-                            #ax.set_ylim(ylim[nmom])
+                        for i_comptype, comptype in enumerate(comptype_pair):
+                            idx = list(summary.keys())[list(summary.values()).index(comptype)]
+                            df = pd.concat([df_main[df_main["ConfigNo"] \
+                                == idx].reset_index(drop=True), df_orig], axis=1)
+                            for i_nmom, nmom in enumerate(nmom_pair):
+                                df_nmom = df[df["nMoments"]==nmom]
+                                x = df_nmom[quantity]
+                                y = np.maximum(df_nmom[output_qty_key], 
+                                            np.finfo(df_nmom[output_qty_key].dtype).eps)
+                                ax = axs[i_nmom,i_comptype]
+                                h = ax.hexbin(x, y, xscale='log', yscale='log', bins='log',
+                                            cmap=color_map, vmin=vmin, vmax=vmax)
+                                x_data, y_gmean = gmean[comptype][nmom][output_qty_key][quantity]
+                                not_nan = ~np.isnan(y_gmean) # may happen in empty bins
+                                ax.loglog(x_data[not_nan], y_gmean[not_nan], color='k',
+                                    marker='o', markersize=4, label="Conditional geometric mean")
+                                ax.set_xlim(xlim[nmom])
+                                ax.set_ylim(ylim[nmom])
+                        axs[0,1].legend(loc='upper right')
+                        for i in range(2):
+                            axs[1,i].set_xlabel(boundary_dist_quantity_names[quantity])
+                            axs[i,1].set_yticklabels([])
+                        fig.subplots_adjust(wspace=0.05)
 
-                    fig.colorbar(h)
-                    plt.show()
-                    quit()
+                        for ax in axs.values():
+                            ax.grid(which='both') 
+                        fig.colorbar(h, ax=list(axs.values()), shrink=0.5, location='bottom')
 
+                        fig.text(0.04, 0.62, output_qty_to_label_map[output_qty_key].replace('\n', ' '),
+                                 va='center', rotation='vertical', size=plt.rcParams['axes.labelsize'])
+
+                        target_filename = os.path.join(target_dir, \
+                                "hist__{0:s}_{1:s}__nmom{2:s}__{3:s}{4:s}".format( \
+                                quantity, \
+                                output_qty_key, \
+                                '_'.join(str(nm) for nm in nmom_pair), \
+                                '_'.join(re.sub('[^a-zA-Z0-9 \n\.]', '-', comptype)
+                                        for comptype in comptype_pair), \
+                                output_format))
+                        print("\t{0:s}".format(target_filename))
+                        fig.savefig(target_filename)
 
 
     print("Plotting mean output quantities...")
@@ -445,7 +460,7 @@ def postprocess_siam(config_module):
                         output_qty_key, \
                         nmom, \
                         output_format))
-                print("\n\t{0:s}".format(target_filename))
+                print("\t{0:s}".format(target_filename))
                 fig.savefig(target_filename)
                 plt.close(fig)
 
@@ -480,7 +495,7 @@ def postprocess_siam(config_module):
                         nmom_pair[0], \
                         nmom_pair[1], \
                         output_format))
-                print("\n\t{0:s}".format(target_filename))
+                print("\t{0:s}".format(target_filename))
                 fig.savefig(target_filename)
                 plt.close(fig)
 
