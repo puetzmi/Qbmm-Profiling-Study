@@ -508,6 +508,6 @@ if __name__ == "__main__":
         try:
             import postprocess_config_siamjscicomp as config_module
         except ModuleNotFoundError as err:
-            err.msg = "A 'postprocess_config.py' must be provided to run postprocessing script."
+            err.msg = "A configuration file must be provided to run postprocessing script."
             raise err
     postprocess_siam(config_module)
