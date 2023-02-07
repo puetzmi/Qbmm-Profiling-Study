@@ -80,7 +80,7 @@ funcs = {quantity: lambda x, _: x for quantity in boundary_dist_quantities}
 #funcs["beta-coeffs"] = lambda x, _: np.min(x[:,1:], axis=1)
 
 # Target directory for output of figures
-target_dir = "fig"
+target_dir = "fig/siam"
 
 # Output format
 output_format = ".pdf"
