@@ -178,6 +178,7 @@ def postprocess_siam(config_module):
     labels_all = labels.copy()
     end = 1 if len(source_dirs) == 1 else 2
     for _ in range(end):
+        marker_cycle = plot_tools.get_markercycle()
         ls_cycle = plot_tools.get_lscycle()
         linestyles = {label: next(ls_cycle) for label in labels}
         ls_cycle = plot_tools.get_lscycle() # reset
@@ -201,10 +202,14 @@ def postprocess_siam(config_module):
 
             # Plot CPU times vs. number of moments
             for idx,comptype in summary.items():
-                lbl = config_to_label_map[comptype] if add_label else None
-                ls = linestyles[label] if len(labels) > 1 else next(ls_cycle)
+                try:
+                    lbl = config_to_label_map[comptype] if add_label else None
+                except KeyError:
+                    continue
+                ls = linestyles[label] if len(labels) > 1 else '-'
+                marker = next(marker_cycle) if len(labels) == 1 else None
                 ax.semilogy(n_moments, inversions_per_second[:,idx],
-                        label=lbl, c=colors[idx], ls=ls, lw=linewidth)
+                        label=lbl, c=colors[idx], ls=ls, lw=linewidth, marker=marker)
 
             # Add labels only during the first iteration since the configurations are repeated
             add_label = False
@@ -308,7 +313,7 @@ def postprocess_siam(config_module):
                         fig = plt.figure()
                         ax = fig.add_subplot(111)
                         hexbin = ax.hexbin(x, y, xscale='log', yscale='log',
-                                bins='log', cmap=color_map)
+                                bins='log', cmap=color_map, linewidths=0.1)
                     else:
                         x_bins = 2**np.linspace(
                             np.log2(np.min(x)), np.log2(np.max(x)), n_hist_bins[0] + 1
@@ -328,7 +333,7 @@ def postprocess_siam(config_module):
                         ylim = ax.get_ylim()
                         not_nan = ~np.isnan(y_gmean) # may happen in empty bins
                         ax.loglog(x_data[not_nan], y_gmean[not_nan], color='k',
-                            marker='o', markersize=4, label="Conditional geometric mean")
+                            marker='o', markerfacecolor='k', markersize=4, label="Conditional geometric mean")
                         ax.set_xlim(x_data[not_nan][0], x_data[not_nan][-1])
                         ax.set_ylim(ylim)
                         ax.set_xlabel(boundary_dist_quantity_names[quantity])
@@ -339,7 +344,8 @@ def postprocess_siam(config_module):
                         right = fig.subplotpars.right
                         fig.tight_layout()
                         fig.subplots_adjust(right=right, left=left)
-                        fig.colorbar(hexbin)
+                        cb = fig.colorbar(hexbin)
+                        cb.set_label = "Absolute frequency"
                         target_filename = os.path.join(target_dir, \
                                 "hist__{0:s}_{1:s}__nmom{2:d}__{3:s}{4:s}".format( \
                                 quantity, \
@@ -400,11 +406,12 @@ def postprocess_siam(config_module):
                                             np.finfo(df_nmom[output_qty_key].dtype).eps)
                                 ax = axs[i_nmom,i_comptype]
                                 h = ax.hexbin(x, y, xscale='log', yscale='log', bins='log',
-                                            cmap=color_map, vmin=vmin, vmax=vmax)
+                                            cmap=color_map, vmin=vmin, vmax=vmax, linewidths=0.1)
                                 x_data, y_gmean = gmean[comptype][nmom][output_qty_key][quantity]
                                 not_nan = ~np.isnan(y_gmean) # may happen in empty bins
                                 ax.loglog(x_data[not_nan], y_gmean[not_nan], color='k',
-                                    marker='o', markersize=4, label="Conditional geometric mean")
+                                    marker='o', markerfacecolor='k',
+                                    markersize=3, label="Conditional geometric mean")
                                 ax.set_xlim(xlim[nmom])
                                 ax.set_ylim(ylim[nmom])
                         axs[0,1].legend(loc='upper right')
@@ -415,7 +422,8 @@ def postprocess_siam(config_module):
 
                         for ax in axs.values():
                             ax.grid(which='both')
-                        fig.colorbar(h, ax=list(axs.values()), shrink=0.5, location='bottom')
+                        cb = fig.colorbar(h, ax=list(axs.values()), shrink=0.5, location='bottom')
+                        cb.set_label("Absolute frequency")
 
                         fig.text(0.04, 0.62, output_qty_to_label_map[output_qty_key].replace('\n', ' '),
                                  va='center', rotation='vertical', size=plt.rcParams['axes.labelsize'])
@@ -442,8 +450,11 @@ def postprocess_siam(config_module):
                 for idx, comptype in summary.items():
                     x_data, err_data = gmean[comptype][nmom][output_qty_key][quantity]
                     idx = ~np.isnan(err_data)
-                    ax.errorbar(x_data[idx], err_data[idx], lw=linewidth, ls=next(ls_cycle), \
-                        c=next(color_cycle), label=config_to_label_map[comptype])
+                    try:
+                        ax.plot(x_data[idx], err_data[idx], lw=linewidth, ls=next(ls_cycle), \
+                            c=next(color_cycle), label=config_to_label_map[comptype])
+                    except KeyError:    # if comptype is not defined in config_to_label_map
+                        pass
                 ax.set_xscale('log')
                 ax.set_yscale('log')
                 ax.grid(which='both')
@@ -470,16 +481,19 @@ def postprocess_siam(config_module):
     for output_qty_key in output_qty_keys:
         for quantity in boundary_dist_quantities:
             for nmom_pair in mean_nmom_pairs:
-                ls_cycle = plot_tools.get_lscycle()
-                color_cycle = plot_tools.get_colorcycle()
                 fig, axs = plot_tools.figure_1by2()
                 for iax,ax in enumerate(axs.values()):
+                    ls_cycle = plot_tools.get_lscycle()
+                    color_cycle = plot_tools.get_colorcycle()
                     nmom = nmom_pair[iax]
                     for idx, comptype in summary.items():
                         x_data, err_data = gmean[comptype][nmom][output_qty_key][quantity]
                         idx = ~np.isnan(err_data)
-                        ax.errorbar(x_data[idx], err_data[idx], lw=linewidth, ls=next(ls_cycle), \
+                        try:
+                            ax.plot(x_data[idx], err_data[idx], lw=linewidth, ls=next(ls_cycle), \
                             c=next(color_cycle), label=config_to_label_map[comptype])
+                        except KeyError:    # if comptype is not defined in config_to_label_map
+                            pass
                         #ax.set_title(f"{n_mom} moments")
                 for ax in axs.values():
                     ax.set_xscale('log')
