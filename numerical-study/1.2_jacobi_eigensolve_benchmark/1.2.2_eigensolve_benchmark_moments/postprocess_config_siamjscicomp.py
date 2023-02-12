@@ -33,24 +33,22 @@ infile_suffix = ".out"
 # Dictionary that maps configuration names used in data files to labels used for plots
 config_to_label_map = { \
         "EigenTridiagonalSymmEigenlibQR+None": \
-            "QR (Eigen)", \
+            "QR (Eigen3)", \
         "EigenTridiagonalSymmEigenlibQR+LinearVandermondeSolver":
-            "QR (Eigen) + Vandermonde solver", \
+            "QR (Eigen3) + Vandermonde solver", \
         "EigenTridiagonalSymmLapackQR+None": \
             "QR (LAPACK)", \
         "EigenTridiagonalSymmLapackQR+LinearVandermondeSolver": \
             "QR (LAPACK) + Vandermonde solver", \
         "EigenTridiagonalSymmLapackRRR+None": \
-            "RRR (LAPACK)", \
-        "EigenTridiagonalSymmLapackRRR+LinearVandermondeSolver": \
-            "RRR (LAPACK) + Vandermonde solver"
-                     }
+            "RRR (LAPACK)"
+         }
 
 # Dictionary that maps configuration names used in data files to labels used for plots
 output_qty_to_label_map = \
     {
             "MomentsRelError2Norm": \
-                "Rel. moment error (euclidean norm)",
+                "Rel. moment error (Euclidean norm)",
             "MomentsRelErrorInfNorm": \
                 "Max. rel. moment error",
             "ComputingTime": \
@@ -94,8 +92,9 @@ n_fig_columns = 2
 # Specify pairs of mean errors plotted side by side
 # in terms of the number of moments
 #mean_nmom_pairs = [(6,16)]
-mean_nmom_pairs = []
+mean_nmom_pairs = [(6,16)]
 
 # Specify pairs of inversion types, of which histograms shall be plotted as examples in 2-by-2 figures
 #mean_comptype_pairs = [("LqmdAlgorithm", "GolubWelschAlgorithmPlainCxx")]
-mean_comptype_pairs = []
+mean_comptype_pairs = [("EigenTridiagonalSymmLapackQR+None",
+        "EigenTridiagonalSymmLapackQR+LinearVandermondeSolver")]
