@@ -60,7 +60,7 @@ error_to_label_map = { \
 error_to_label_map = \
     {
             "MomentsRelError2Norm": \
-                "Rel. moment error (euclidean norm)",
+                "Rel. moment error (Euclidean norm)",
             "MomentsRelErrorInfNorm": \
                 "Max. rel. moment error",
             "ComputingTime": \
