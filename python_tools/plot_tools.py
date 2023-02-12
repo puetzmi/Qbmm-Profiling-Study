@@ -23,13 +23,17 @@ mpl_params = {'legend.fontsize': 8,
          'grid.linestyle': ':',
          'grid.linewidth': 0.5,
          'axes.formatter.limits': [-2,2],
-         'axes.formatter.use_mathtext': True}
+         'axes.formatter.use_mathtext': True,
+         'lines.markerfacecolor': 'none',
+         'lines.markersize': 4.5,
+         'lines.linewidth': 1.,
+ }
 plt.rcParams.update(mpl_params)
 
 # Line property cycles
 _default_colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
 get_colorcycle = lambda: cycle(_default_colors)
-_basic_linestyles = ["-","--","-.",":"]
+_basic_linestyles = ["-","--","-.",":", (0, (3, 1, 1, 1))]
 get_lscycle = lambda: cycle(_basic_linestyles)
 _basic_markers = ['o', 's', 'v', '^', 'D', 'h']
 get_markercycle = lambda: cycle(_basic_markers)

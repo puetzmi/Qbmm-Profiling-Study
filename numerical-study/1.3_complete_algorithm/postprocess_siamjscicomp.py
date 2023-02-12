@@ -164,9 +164,6 @@ def postprocess_siam(config_module):
     fig.set_size_inches(fig_size)
     axs = fig.subplots(ncols=len(physical_setups), sharey=True)
     axs = {idx: axs[i] for i,idx in enumerate(physical_setups)}
-    plt.rcParams['lines.markerfacecolor'] = 'none'
-    plt.rcParams['lines.markersize'] = 4.5
-    plt.rcParams['lines.linewidth'] = 0.8
 
     df_group = df.groupby(["nMoments", "ConfigNo"])
 
