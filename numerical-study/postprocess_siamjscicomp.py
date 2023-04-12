@@ -108,7 +108,7 @@ def postprocess_siam(config_module):
     try:
         color_map = config.color_map
     except AttributeError:
-        color_map = "coolwarm"
+        color_map = plt.rcParams["image.cmap"]
 
     # Indicate whether or not to plot histograms of selected quantities, which may take some time
     try:
