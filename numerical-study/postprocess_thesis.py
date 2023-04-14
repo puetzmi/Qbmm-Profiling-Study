@@ -17,11 +17,21 @@ sys.path.append(os.getcwd())
 import plot_tools
 
 
-def postprocess_siam(config_module):
+def postprocess_thesis(config_module, paper='a5'):
     """!
     @brief Main function.
 
     """
+
+    if paper == 'a5':
+        figsize = list(plt.rcParams["figure.figsize"])
+        figsize[0] /= 1.9
+        figsize[1] /=1.2
+        plt.rcParams["figure.figsize"] = tuple(figsize)
+        plt.rcParams["legend.fontsize"] -= 1
+    elif paper != 'a4':
+        error = f"Unknown or unsupported paper format '{paper}'."
+        raise ValueError(error)
 
     config = config_module
 
@@ -410,14 +420,15 @@ def postprocess_siam(config_module):
                                 not_nan = ~np.isnan(y_gmean) # may happen in empty bins
                                 ax.loglog(x_data[not_nan], y_gmean[not_nan], color='k',
                                     marker='o', markerfacecolor='k',
-                                    markersize=3, label="Conditional geometric mean")
+                                    markersize=3, label="Conditional\ngeometric mean")
                                 ax.set_xlim(xlim[nmom])
                                 ax.set_ylim(ylim[nmom])
-                        axs[0,1].legend(loc='upper right')
+                        axs[0,0].legend(loc='upper right')
                         for i in range(2):
                             axs[1,i].set_xlabel(boundary_dist_quantity_names[quantity])
                             axs[i,1].set_yticklabels([])
-                        fig.subplots_adjust(wspace=0.05)
+                            #axs[i,1].tick_params(axis=u'both', which=u'both',length=0)
+                        fig.subplots_adjust(wspace=0.0, left=0.18, right=0.99)
 
                         for ax in axs.values():
                             ax.grid(which='both')
@@ -519,8 +530,8 @@ if __name__ == "__main__":
         config_module = importlib.import_module(config_file.replace('.py',''))
     except IndexError:
         try:
-            import postprocess_config_siamjscicomp as config_module
+            import postprocess_config_thesis as config_module
         except ModuleNotFoundError as err:
             err.msg = "A configuration file must be provided to run postprocessing script."
             raise err
-    postprocess_siam(config_module)
+    postprocess_thesis(config_module)
