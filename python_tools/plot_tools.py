@@ -76,7 +76,7 @@ def figure_1by2(ax_keys=['l','r']):
 
 def figure_2by2(ax_keys=['ul','ur','ll','lr']):
     """!
-    @brief Convenience function to create 1x2 figure with initialized side-by-side axes.
+    @brief Convenience function to create 2x2 figure with initialized side-by-side axes.
 
     @param ax_keys iterable: Iterable object containing the keys to address the axes (optional default: ['l', 'r']).
 
@@ -88,6 +88,23 @@ def figure_2by2(ax_keys=['ul','ur','ll','lr']):
     width, height = fig.get_size_inches()
     fig.set_size_inches(width, height*2)
     ax = {key: fig.add_subplot(221 + i) for i,key in enumerate(ax_keys)}
+    return fig, ax
+
+
+def figure_2by1(ax_keys=['u','l']):
+    """!
+    @brief Convenience function to create 2x1 figure with initialized side-by-side axes.
+
+    @param ax_keys iterable: Iterable object containing the keys to address the axes (optional default: ['l', 'r']).
+
+    @return fig Figure: The created `Figure` object.
+    @return ax AxesSubplot: Dictionary containing the created `AxesSubplot` objects.
+
+    """
+    fig = plt.figure()
+    width, height = fig.get_size_inches()
+    fig.set_size_inches(width, height*2)
+    ax = {key: fig.add_subplot(211 + i) for i,key in enumerate(ax_keys)}
     return fig, ax
 
 

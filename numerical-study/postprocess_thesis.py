@@ -22,16 +22,20 @@ def postprocess_thesis(config_module, paper='a5'):
     @brief Main function.
 
     """
+    plt.rcParams["figure.figsize"] = (4.2, 2.4)
+    plt.rcParams["axes.labelsize"] = 9
+    plt.rcParams["axes.formatter.limits"] = [-2,3]
 
+    """
     if paper == 'a5':
         figsize = list(plt.rcParams["figure.figsize"])
         figsize[0] /= 1.9
         figsize[1] /=1.2
         plt.rcParams["figure.figsize"] = tuple(figsize)
-        plt.rcParams["legend.fontsize"] -= 1
     elif paper != 'a4':
         error = f"Unknown or unsupported paper format '{paper}'."
         raise ValueError(error)
+    """
 
     config = config_module
 
@@ -195,7 +199,10 @@ def postprocess_thesis(config_module, paper='a5'):
         colors = {i: next(color_cycle) for i in np.unique(df["ConfigNo"])}
         linewidth = 1.
 
+        figsize = plt.rcParams["figure.figsize"].copy()
+        plt.rcParams["figure.figsize"][1] *= 1.2
         fig, ax = plot_tools.figure(shrink_axes=0.2)
+        plt.rcParams["figure.figsize"] = figsize.copy()
 
         # Use column headings for configuration labels if no map is provided
         if not config_to_label_map:
@@ -230,7 +237,7 @@ def postprocess_thesis(config_module, paper='a5'):
         ax.grid(which='both')
         ax.set_xlabel("Number of moments")
         ax.set_ylabel("Executions per second")
-        plot_tools.figure_legend(fig, ax, adjust_axes=True, linewidth=linewidth, vspace=4, rel_width=0.9)
+        plot_tools.figure_legend(fig, ax, adjust_axes=True, linewidth=linewidth, vspace=4, rel_width=0.99)
 
         target_filename = os.path.join(target_dir, "cpu-times_nmom{0:s}".format(output_format))
         if len(source_dirs) > 1:
@@ -342,7 +349,7 @@ def postprocess_thesis(config_module, paper='a5'):
                         ylim = ax.get_ylim()
                         not_nan = ~np.isnan(y_gmean) # may happen in empty bins
                         ax.loglog(x_data[not_nan], y_gmean[not_nan], color='k',
-                            marker='o', markerfacecolor='k', markersize=4, label="Conditional geometric mean")
+                            marker='o', markerfacecolor='k', markersize=2.5, label="Conditional geometric mean")
                         ax.set_xlim(x_data[not_nan][0], x_data[not_nan][-1])
                         ax.set_ylim(ylim)
                         ax.set_xlabel(boundary_dist_quantity_names[quantity])
@@ -420,10 +427,11 @@ def postprocess_thesis(config_module, paper='a5'):
                                 not_nan = ~np.isnan(y_gmean) # may happen in empty bins
                                 ax.loglog(x_data[not_nan], y_gmean[not_nan], color='k',
                                     marker='o', markerfacecolor='k',
-                                    markersize=3, label="Conditional\ngeometric mean")
+                                    markersize=2.5, label="Conditional\ngeometric mean")
                                 ax.set_xlim(xlim[nmom])
                                 ax.set_ylim(ylim[nmom])
-                        axs[0,0].legend(loc='upper right')
+                        axs[0,0].legend(loc='upper right',
+                                fontsize=plt.rcParams["legend.fontsize"]-1)
                         for i in range(2):
                             axs[1,i].set_xlabel(boundary_dist_quantity_names[quantity])
                             axs[i,1].set_yticklabels([])
@@ -486,12 +494,15 @@ def postprocess_thesis(config_module, paper='a5'):
                 plt.close(fig)
 
 
-    # Plot selected graphs of mean output quantities side by side
+    # Plot selected graphs of mean output quantities in 2x1 graph
     print("Plotting selected graphs...")
     for output_qty_key in output_qty_keys:
         for quantity in boundary_dist_quantities:
             for nmom_pair in mean_nmom_pairs:
-                fig, axs = plot_tools.figure_1by2()
+                fig, axs = plot_tools.figure_2by1(ax_keys=(0,1))
+                figsize = fig.get_size_inches()
+                figsize[1] /= 1.2
+                fig.set_size_inches(figsize)
                 for iax,ax in enumerate(axs.values()):
                     ls_cycle = plot_tools.get_lscycle()
                     color_cycle = plot_tools.get_colorcycle()
@@ -509,9 +520,10 @@ def postprocess_thesis(config_module, paper='a5'):
                     ax.set_xscale('log')
                     ax.set_yscale('log')
                     ax.grid(which='both')
-                    ax.set_xlabel(boundary_dist_quantity_names[quantity])
-                axs['l'].set_ylabel(output_qty_to_label_map[output_qty_key])
-                plot_tools.figure_legend(fig, ax, adjust_axes=True, ncol='auto')
+                axs[1].set_xlabel(boundary_dist_quantity_names[quantity])
+                fig.text(0.04, 0.56, output_qty_to_label_map[output_qty_key].replace('\n', ' '),
+                         va='center', rotation='vertical', size=plt.rcParams['axes.labelsize'])
+                plot_tools.figure_legend(fig, ax, adjust_axes=True, ncol='auto', rel_width=0.99)
                 target_filename = os.path.join(target_dir, \
                         "mean__{0:s}_{1:s}__nmom{2:d}_{3:d}{4:s}".format( \
                         quantity, \
@@ -520,6 +532,7 @@ def postprocess_thesis(config_module, paper='a5'):
                         nmom_pair[1], \
                         output_format))
                 print("\t{0:s}".format(target_filename))
+                fig.subplots_adjust(hspace=0.23, left=0.19, right=0.79)
                 fig.savefig(target_filename)
                 plt.close(fig)
 
