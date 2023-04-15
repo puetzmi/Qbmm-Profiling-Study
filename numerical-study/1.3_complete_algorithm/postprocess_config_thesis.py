@@ -41,11 +41,11 @@ config_to_label_map = {
 # Map moment closure subroutines to labels
 subroutine_to_label_map = {
         "CoreInversion":
-            r"Subroutine (i): computation of Jacobi matrix",
+            r"Subroutine I: computation of Jacobi matrix",
         "Quadrature":
-            r"Subroutine (ii): solution of eigenvalue problem",
+            r"Subroutine II: solution of eigenvalue problem",
         "Integrate":
-            r"Subroutine (iii): closure of moment equations",
+            r"Subroutine III: closure of moment equations",
 }
 
 # Target directory for output of figures
