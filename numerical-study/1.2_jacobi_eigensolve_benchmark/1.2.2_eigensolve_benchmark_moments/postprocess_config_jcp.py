@@ -33,15 +33,15 @@ infile_suffix = ".out"
 # Dictionary that maps configuration names used in data files to labels used for plots
 config_to_label_map = { \
         "EigenTridiagonalSymmEigenlibQR+None": \
-            "QR (Eigen3)", \
+            "QR (Eigen3) w/ eigenvectors", \
         "EigenTridiagonalSymmEigenlibQR+LinearVandermondeSolver":
             "QR (Eigen3) + Vandermonde solver", \
         "EigenTridiagonalSymmLapackQR+None": \
-            "QR (LAPACK)", \
+            "QR (LAPACK) w/ eigenvectors", \
         "EigenTridiagonalSymmLapackQR+LinearVandermondeSolver": \
             "QR (LAPACK) + Vandermonde solver", \
         "EigenTridiagonalSymmLapackRRR+None": \
-            "RRR (LAPACK)"
+            "RRR (LAPACK) w/ eigenvectors"
          }
 
 # Dictionary that maps configuration names used in data files to labels used for plots
