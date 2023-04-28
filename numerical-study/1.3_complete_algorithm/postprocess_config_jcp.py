@@ -49,7 +49,7 @@ subroutine_to_label_map = {
 }
 
 # Target directory for output of figures
-target_dir = "fig/siam"
+target_dir = "fig/jcp"
 
 # Output format
 output_format = ".pdf"

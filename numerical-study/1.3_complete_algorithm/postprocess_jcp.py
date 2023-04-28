@@ -18,7 +18,7 @@ import plot_tools
 import pandas as pd
 
 
-def postprocess_siam(config_module):
+def postprocess_jcp(config_module):
     """!
     @brief Main function.
 
@@ -209,8 +209,8 @@ if __name__ == "__main__":
         config_module = importlib.import_module(config_file.replace('.py',''))
     except IndexError:
         try:
-            import postprocess_config_siamjscicomp as config_module
+            import postprocess_config_jcp as config_module
         except ModuleNotFoundError as err:
             err.msg = "A configuration file must be provided to run postprocessing script."
             raise err
-    df = postprocess_siam(config_module)
+    df = postprocess_jcp(config_module)
