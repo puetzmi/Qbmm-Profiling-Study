@@ -41,7 +41,9 @@ config_to_label_map = { \
         "EigenTridiagonalSymmLapackQR+LinearVandermondeSolver": \
             "QR (LAPACK) + Vandermonde solver", \
         "EigenTridiagonalSymmLapackRRR+None": \
-            "RRR (LAPACK)"
+            "RRR (LAPACK)",
+        "EigenTridiagonalSymmLapackRRR+LinearVandermondeSolver": \
+            "RRR (LAPACK) + Vandermonde solver"
          }
 
 # Dictionary that maps configuration names used in data files to labels used for plots
