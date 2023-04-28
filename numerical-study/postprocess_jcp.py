@@ -2,7 +2,7 @@
 """!
 @file postprocess.py
 @author M. Puetz
-@brief This script generates plots of benchmark results including errors, modified for publication in the SIAM Journal of Scientific Computing. It is primarily used to postprocess results of the cases 1.1 and 1.2. The script requires a configuration file `postprocess_config.py` or one with an alternative name (provided as command line parameter) in the working directory, see e.g. 1.1_core_inversion_benchmark for an example.
+@brief This script generates plots of benchmark results including errors, for publication in the Journal of Compuational Physics. It is primarily used to postprocess results of the cases 1.1 and 1.2. The script requires a configuration file `postprocess_config.py` or one with an alternative name (provided as command line parameter) in the working directory, see e.g. 1.1_core_inversion_benchmark for an example.
 
 """
 import importlib
@@ -18,7 +18,7 @@ sys.path.append(os.getcwd())
 import plot_tools
 
 
-def postprocess_siam(config_module):
+def postprocess_jcp(config_module):
     """!
     @brief Main function.
 
@@ -357,7 +357,6 @@ def postprocess_siam(config_module):
                         fig.savefig(target_filename)
                         plt.close(fig)
 
-
     mean_nmom_pairs =  config.mean_nmom_pairs
     mean_comptype_pairs = config.mean_comptype_pairs
 
@@ -422,11 +421,25 @@ def postprocess_siam(config_module):
 
                         for ax in axs.values():
                             ax.grid(which='both')
+
+                        fig.text(0.09, 0.57, output_qty_to_label_map[output_qty_key].replace('\n', ' '),
+                                 va='center', rotation='vertical', size=plt.rcParams['axes.labelsize'])
+
+                        left = fig.subplotpars.left
+                        right = fig.subplotpars.right
+                        top = fig.subplotpars.top
+                        bottom = fig.subplotpars.bottom
+                        fig.subplots_adjust(right=right+0.05, left=left+0.05, top=top, bottom=bottom-0.1)
+
                         cb = fig.colorbar(h, ax=list(axs.values()), shrink=0.5, location='bottom')
                         cb.set_label("Absolute frequency")
 
-                        fig.text(0.04, 0.62, output_qty_to_label_map[output_qty_key].replace('\n', ' '),
-                                 va='center', rotation='vertical', size=plt.rcParams['axes.labelsize'])
+                        for i_comptype, comptype in enumerate(comptype_pair):
+                            axs[0,i_comptype].set_title(config_to_label_map[comptype], weight='bold', pad=12,
+                                    size=plt.rcParams['axes.titlesize'] - 2)
+                        for i_nmom, nmom in enumerate(nmom_pair):
+                            axs[i_nmom,0].set_ylabel(f"{nmom} moments",
+                                    size=plt.rcParams['axes.titlesize'] - 2, weight='bold', labelpad=40)
 
                         target_filename = os.path.join(target_dir, \
                                 "hist__{0:s}_{1:s}__nmom{2:s}__{3:s}{4:s}".format( \
@@ -502,6 +515,12 @@ def postprocess_siam(config_module):
                     ax.set_xlabel(boundary_dist_quantity_names[quantity])
                 axs['l'].set_ylabel(output_qty_to_label_map[output_qty_key])
                 plot_tools.figure_legend(fig, ax, adjust_axes=True, ncol='auto')
+
+                for i_nmom, nmom in enumerate(nmom_pair):
+                    key = list(axs.keys())[i_nmom]
+                    axs[key].set_title(f"{nmom} moments", weight='bold', pad=12,
+                            size=plt.rcParams['axes.titlesize'] - 2)
+
                 target_filename = os.path.join(target_dir, \
                         "mean__{0:s}_{1:s}__nmom{2:d}_{3:d}{4:s}".format( \
                         quantity, \
@@ -520,8 +539,8 @@ if __name__ == "__main__":
         config_module = importlib.import_module(config_file.replace('.py',''))
     except IndexError:
         try:
-            import postprocess_config_siamjscicomp as config_module
+            import postprocess_config_jcp as config_module
         except ModuleNotFoundError as err:
             err.msg = "A configuration file must be provided to run postprocessing script."
             raise err
-    postprocess_siam(config_module)
+    postprocess_jcp(config_module)

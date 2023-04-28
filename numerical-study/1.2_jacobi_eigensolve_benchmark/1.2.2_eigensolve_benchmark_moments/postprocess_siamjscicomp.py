@@ -1,1 +1,0 @@
-../../postprocess_siamjscicomp.py
