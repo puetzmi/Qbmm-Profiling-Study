@@ -232,7 +232,7 @@ def postprocess_thesis(config_module, paper='a5'):
 
         if len(source_dirs) > 1:
             plot_tools.linestyle_legend(ax, linestyles=linestyles.values(), labels=labels, \
-                lw=linewidth, layout='vertical', ncol=2)
+                lw=linewidth, layout='vertical', ncol=1)
 
         ax.grid(which='both')
         ax.set_xlabel("Number of moments")
