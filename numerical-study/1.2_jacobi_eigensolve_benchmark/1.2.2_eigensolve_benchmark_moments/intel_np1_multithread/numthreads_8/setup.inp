@@ -1,0 +1,10 @@
+eigenSolverTypes = {
+                        "EigenTridiagonalSymmEigenlibQR",
+                        "EigenTridiagonalSymmLapackQR",
+                        "EigenTridiagonalSymmLapackRRR",
+};
+
+linearSolverTypes = {
+                        "None",
+                        "LinearVandermondeSolver",
+};
