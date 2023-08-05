@@ -7,14 +7,22 @@ Parameters for postprocessing script.
 data_file_pattern = "data_nmom"
 
 # Source directories and corresponding labels
-source_dirs = ["gnu_np1", "gnu_np6", "intel_np1", "intel_np6"]
-labels = ["GNU (1 core)", "GNU (6 cores)", "Intel (1 core)", "Intel (6 cores)"]
+source_dirs = [
+                "intel_np1",
+                "intel_np6",
+                "gnu_np6",
+            ]
+labels = [
+            "Intel (1 core)",
+            "Intel (6 cores)",
+            "GNU (1 core)",
+        ]
 
 # Main directory for complete analysis
 main_dir = "intel_np1"
 
 # Directory containing the input data for the benchmark application
-data_dir = "../data"
+data_dir = "../../data"
 
 # Potential common prefix of all data files before `data_file_pattern`
 infile_prefix = ""
@@ -24,17 +32,30 @@ infile_suffix = ".out"
 
 # Dictionary that maps configuration names used in data files to labels used for plots
 config_to_label_map = { \
-                        "LqmdAlgorithm": "LQMDA", \
-                        "GolubWelschAlgorithmLapackPotrf": "GWA (MKL/LAPACK-POTRF)", \
-                        "GolubWelschAlgorithmLapackPotrf2": "GWA (MKL/LAPACK-POTRF2)", \
-                        "GolubWelschAlgorithmEigenlib": "GWA (Eigen3)", \
-                        "GolubWelschAlgorithmPlainCxx": "GWA (plain C++)"
-                     }
+        "EigenTridiagonalSymmEigenlibQR+None": \
+            "QR (Eigen3) w/ eigenvectors", \
+        "EigenTridiagonalSymmEigenlibQR+LinearVandermondeSolver":
+            "QR (Eigen3) + Vandermonde solver", \
+        "EigenTridiagonalSymmLapackQR+None": \
+            "QR (LAPACK) w/ eigenvectors", \
+        "EigenTridiagonalSymmLapackQR+LinearVandermondeSolver": \
+            "QR (LAPACK) + Vandermonde solver", \
+        "EigenTridiagonalSymmLapackRRR+None": \
+            "RRR (LAPACK) w/ eigenvectors"
+         }
 
 # Dictionary that maps configuration names used in data files to labels used for plots
-output_qty_to_label_map = { \
-                        "JacobiMatrixRelErrorFrobeniusNorm": "Rel. Jacobi matrix error\n(Frobenius norm)", \
-                      }
+output_qty_to_label_map = \
+    {
+            "MomentsRelError2Norm": \
+                "Rel. moment error (Euclidean norm)",
+            "MomentsRelErrorInfNorm": \
+                "Max. rel. moment error",
+            "ComputingTime": \
+                "Computation time",
+            "RelativeSeparationCoefficient": \
+                "Rel. separation coeff."
+    }
 
 # Quantities used to measure distance to moment space boundary
 # (as in input filenames)
@@ -57,7 +78,7 @@ funcs = {quantity: lambda x, _: x for quantity in boundary_dist_quantities}
 #funcs["beta-coeffs"] = lambda x, _: np.min(x[:,1:], axis=1)
 
 # Target directory for output of figures
-target_dir = "fig"
+target_dir = "fig/jcp"
 
 # Output format
 output_format = ".pdf"
@@ -66,4 +87,14 @@ output_format = ".pdf"
 plot_histograms = True
 
 # Number of columns in figures (only to adjust figure size)
-n_fig_columns = 1
+n_fig_columns = 2
+
+# Specify pairs of mean errors plotted side by side
+# in terms of the number of moments
+#mean_nmom_pairs = [(6,16)]
+mean_nmom_pairs = [(6,16)]
+
+# Specify pairs of inversion types, of which histograms shall be plotted as examples in 2-by-2 figures
+#mean_comptype_pairs = [("LqmdAlgorithm", "GolubWelschAlgorithmPlainCxx")]
+mean_comptype_pairs = [("EigenTridiagonalSymmLapackQR+None",
+        "EigenTridiagonalSymmLapackQR+LinearVandermondeSolver")]
